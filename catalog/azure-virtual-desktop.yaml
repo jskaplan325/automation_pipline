@@ -34,12 +34,12 @@ tags:
   - windows
   - avd
 
-estimated_monthly_cost_usd: 200-800
+estimated_monthly_cost_usd: 150-1200
 cost_breakdown:
-  - component: Session Hosts (2x Standard_D4s_v3)
-    estimate: "$150-400/month"
+  - component: Session Host VMs
+    estimate: "$100-800/month"
   - component: Azure Files (Premium)
-    estimate: "$50-150/month"
+    estimate: "$30-200/month"
   - component: Networking
     estimate: "$20-50/month"
   - component: Windows Licensing
@@ -51,6 +51,20 @@ parameters:
     type: string
     required: true
     description: Friendly name for the AVD workspace
+
+  - name: size
+    label: Deployment Size
+    type: select
+    required: true
+    options:
+      - small
+      - medium
+      - large
+    default: small
+    description: |
+      Small: 2 hosts (4 vCPU/16GB), ~20 users, 100GB profiles (~$150/mo)
+      Medium: 4 hosts (4 vCPU/16GB), ~50 users, 256GB profiles (~$400/mo)
+      Large: 8 hosts (8 vCPU/32GB), ~150 users, 512GB profiles (~$1200/mo)
 
   - name: region
     label: Azure Region
@@ -65,46 +79,12 @@ parameters:
       - westeurope
     default: eastus
 
-  - name: host_count
-    label: Number of Session Hosts
-    type: select
-    required: true
-    options:
-      - "1"
-      - "2"
-      - "3"
-      - "5"
-    default: "2"
-    description: Each host supports ~10-15 concurrent users
-
-  - name: host_size
-    label: Host VM Size
-    type: select
-    required: true
-    options:
-      - Standard_D2s_v3
-      - Standard_D4s_v3
-      - Standard_D8s_v3
-    default: Standard_D4s_v3
-    description: D4 recommended for general office work
-
   - name: install_m365
     label: Pre-install Microsoft 365 Apps
     type: boolean
     required: false
     default: "true"
     description: Include Word, Excel, PowerPoint, Outlook, Teams
-
-  - name: profile_storage_gb
-    label: Profile Storage (GB)
-    type: select
-    required: true
-    options:
-      - "100"
-      - "256"
-      - "512"
-    default: "100"
-    description: Storage for user profiles (FSLogix)
 
 ado_pipeline:
   project: InfrastructureTeam

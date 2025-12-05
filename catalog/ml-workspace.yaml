@@ -36,14 +36,14 @@ tags:
   - training
   - inference
 
-estimated_monthly_cost_usd: 100-1000
+estimated_monthly_cost_usd: 100-1500
 cost_breakdown:
   - component: ML Workspace
     estimate: "Free"
-  - component: Compute Instance (when running)
-    estimate: "$50-200/month"
-  - component: Training Compute (when running)
-    estimate: "$50-500/month"
+  - component: Compute Instance
+    estimate: "$50-300/month"
+  - component: Training Cluster
+    estimate: "$0-800/month"
   - component: Storage
     estimate: "$20-100/month"
   - component: Container Registry
@@ -55,6 +55,20 @@ parameters:
     type: string
     required: true
     description: Name for your ML workspace
+
+  - name: size
+    label: Environment Size
+    type: select
+    required: true
+    options:
+      - small
+      - medium
+      - large
+    default: small
+    description: |
+      Small: 4 vCPU/16GB dev instance, 4-node CPU cluster (~$100/mo)
+      Medium: 8 vCPU/32GB dev instance, 8-node CPU cluster (~$400/mo)
+      Large: GPU dev instance (NC6), 8-node GPU cluster, premium storage (~$1500/mo)
 
   - name: region
     label: Azure Region
@@ -69,48 +83,12 @@ parameters:
       - westeurope
     default: eastus
 
-  - name: create_compute_instance
-    label: Create Dev Compute Instance
-    type: boolean
-    required: false
-    default: "true"
-    description: Create a compute instance for notebook development
-
-  - name: compute_instance_size
-    label: Compute Instance Size
-    type: select
-    required: false
-    options:
-      - Standard_DS3_v2
-      - Standard_DS4_v2
-      - Standard_NC6s_v3
-    default: Standard_DS3_v2
-    description: DS=CPU only, NC=GPU for deep learning
-
-  - name: create_compute_cluster
-    label: Create Training Cluster
-    type: boolean
-    required: false
-    default: "true"
-    description: Create an auto-scaling cluster for training jobs
-
-  - name: cluster_max_nodes
-    label: Training Cluster Max Nodes
-    type: select
-    required: false
-    options:
-      - "2"
-      - "4"
-      - "8"
-    default: "4"
-    description: Maximum nodes when cluster scales up
-
   - name: enable_gpu
     label: Enable GPU Compute
     type: boolean
     required: false
     default: "false"
-    description: Use GPU VMs for deep learning (higher cost)
+    description: Add GPU capability for deep learning (included in Large size)
 
 ado_pipeline:
   project: InfrastructureTeam

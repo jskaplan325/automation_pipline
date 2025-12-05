@@ -39,16 +39,16 @@ tags:
   - chatbot
   - embeddings
 
-estimated_monthly_cost_usd: 300-800
+estimated_monthly_cost_usd: 200-1500
 cost_breakdown:
   - component: AI Foundry Hub
     estimate: "$50/month"
   - component: Azure OpenAI (GPT-4 + Embeddings)
-    estimate: "$100-400/month"
-  - component: Azure AI Search (Basic)
-    estimate: "$75/month"
+    estimate: "$50-500/month"
+  - component: Azure AI Search
+    estimate: "$0-500/month"
   - component: Storage & Compute
-    estimate: "$75-275/month"
+    estimate: "$50-300/month"
 
 parameters:
   - name: project_name
@@ -56,6 +56,20 @@ parameters:
     type: string
     required: true
     description: Name for your RAG project (lowercase, hyphens allowed)
+
+  - name: size
+    label: Deployment Size
+    type: select
+    required: true
+    options:
+      - small
+      - medium
+      - large
+    default: small
+    description: |
+      Small: Free AI Search, GPT-3.5, 10GB docs (~$200/mo) - POC/testing
+      Medium: Basic AI Search, GPT-4, 50GB docs (~$500/mo) - small teams
+      Large: Standard AI Search, GPT-4-Turbo, 500GB docs (~$1500/mo) - production
 
   - name: region
     label: Azure Region
@@ -68,28 +82,6 @@ parameters:
       - swedencentral
     default: eastus
     description: Must support both OpenAI and AI Search
-
-  - name: search_tier
-    label: AI Search Tier
-    type: select
-    required: true
-    options:
-      - free
-      - basic
-      - standard
-    default: basic
-    description: Free for testing (50MB), Basic for small projects, Standard for production
-
-  - name: gpt_model
-    label: GPT Model
-    type: select
-    required: true
-    options:
-      - gpt-4
-      - gpt-4-turbo
-      - gpt-35-turbo
-    default: gpt-4
-    description: GPT-4 recommended for best quality answers
 
   - name: deploy_sample_pipeline
     label: Deploy Sample RAG Pipeline

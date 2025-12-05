@@ -34,16 +34,16 @@ tags:
   - docker
   - devops
 
-estimated_monthly_cost_usd: 200-1000
+estimated_monthly_cost_usd: 150-1200
 cost_breakdown:
   - component: AKS Control Plane
     estimate: "Free (Standard tier: $75/mo)"
-  - component: Node Pool (3x Standard_D4s_v3)
-    estimate: "$150-500/month"
-  - component: Container Registry (Basic)
-    estimate: "$5/month"
+  - component: Node Pool VMs
+    estimate: "$100-800/month"
+  - component: Container Registry
+    estimate: "$5-50/month"
   - component: Log Analytics
-    estimate: "$50-200/month"
+    estimate: "$30-150/month"
   - component: Load Balancer
     estimate: "$20-50/month"
 
@@ -53,6 +53,20 @@ parameters:
     type: string
     required: true
     description: Name for your AKS cluster (lowercase, alphanumeric)
+
+  - name: size
+    label: Cluster Size
+    type: select
+    required: true
+    options:
+      - small
+      - medium
+      - large
+    default: small
+    description: |
+      Small: 2 nodes, 4 vCPU/16GB each, max 20 pods (~$150/mo)
+      Medium: 3 nodes, 8 vCPU/32GB each, max 75 pods (~$450/mo)
+      Large: 5 nodes, 8 vCPU/32GB each, autoscale to 10, max 200 pods (~$1200/mo)
 
   - name: region
     label: Azure Region
@@ -67,34 +81,12 @@ parameters:
       - westeurope
     default: eastus
 
-  - name: node_count
-    label: Initial Node Count
-    type: select
-    required: true
-    options:
-      - "2"
-      - "3"
-      - "5"
-    default: "3"
-    description: Number of nodes in the default pool
-
-  - name: node_size
-    label: Node VM Size
-    type: select
-    required: true
-    options:
-      - Standard_D2s_v3
-      - Standard_D4s_v3
-      - Standard_D8s_v3
-    default: Standard_D4s_v3
-    description: D2=2 vCPU/8GB, D4=4 vCPU/16GB, D8=8 vCPU/32GB
-
   - name: enable_autoscaling
     label: Enable Autoscaling
     type: boolean
     required: false
     default: "true"
-    description: Automatically scale nodes based on demand (1-10 nodes)
+    description: Automatically scale nodes based on demand
 
   - name: private_cluster
     label: Private Cluster

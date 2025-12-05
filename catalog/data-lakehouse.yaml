@@ -33,18 +33,18 @@ tags:
   - data-factory
   - big-data
 
-estimated_monthly_cost_usd: 300-1500
+estimated_monthly_cost_usd: 200-2000
 cost_breakdown:
   - component: Data Lake Storage
-    estimate: "$50-200/month"
+    estimate: "$30-200/month"
   - component: Synapse Workspace
     estimate: "$0 (pay per query)"
   - component: Spark Pool (when running)
-    estimate: "$100-500/month"
+    estimate: "$50-500/month"
   - component: Data Factory Pipelines
-    estimate: "$50-300/month"
-  - component: Dedicated SQL Pool (optional)
-    estimate: "$150-500/month"
+    estimate: "$30-300/month"
+  - component: Dedicated SQL Pool (M/L only)
+    estimate: "$0-1000/month"
 
 parameters:
   - name: workspace_name
@@ -52,6 +52,20 @@ parameters:
     type: string
     required: true
     description: Name for your Synapse workspace
+
+  - name: size
+    label: Environment Size
+    type: select
+    required: true
+    options:
+      - small
+      - medium
+      - large
+    default: small
+    description: |
+      Small: Serverless SQL, Small Spark (4 nodes), 1TB storage (~$200/mo)
+      Medium: Serverless SQL, Medium Spark (8 nodes), 5TB storage (~$600/mo)
+      Large: Dedicated SQL DW100c, Large Spark (16 nodes), 20TB storage (~$2000/mo)
 
   - name: region
     label: Azure Region
@@ -75,31 +89,6 @@ parameters:
       - ZRS
     default: LRS
     description: LRS=Local, GRS=Geo-redundant, ZRS=Zone-redundant
-
-  - name: enable_spark
-    label: Enable Spark Pool
-    type: boolean
-    required: false
-    default: "true"
-    description: Deploy a Spark pool for big data processing
-
-  - name: spark_node_size
-    label: Spark Node Size
-    type: select
-    required: false
-    options:
-      - Small
-      - Medium
-      - Large
-    default: Small
-    description: Small=4 vCPU, Medium=8 vCPU, Large=16 vCPU
-
-  - name: enable_dedicated_sql
-    label: Enable Dedicated SQL Pool
-    type: boolean
-    required: false
-    default: "false"
-    description: Deploy dedicated SQL pool (higher cost, better performance)
 
 ado_pipeline:
   project: InfrastructureTeam

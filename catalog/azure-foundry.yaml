@@ -25,14 +25,14 @@ tags:
   - machine-learning
   - foundry
 
-estimated_monthly_cost_usd: 150-300
+estimated_monthly_cost_usd: 100-600
 cost_breakdown:
   - component: AI Hub Base
     estimate: "$50/month"
   - component: Azure OpenAI (usage-based)
-    estimate: "$50-150/month"
+    estimate: "$25-300/month"
   - component: Compute (when running)
-    estimate: "$50-100/month"
+    estimate: "$25-250/month"
 
 parameters:
   - name: project_name
@@ -40,6 +40,20 @@ parameters:
     type: string
     required: true
     description: A friendly name for your AI project (lowercase, no spaces - use hyphens)
+
+  - name: size
+    label: Environment Size
+    type: select
+    required: true
+    options:
+      - small
+      - medium
+      - large
+    default: small
+    description: |
+      Small: 4 vCPU, 16GB RAM, GPT-3.5 only (~$100/mo)
+      Medium: 8 vCPU, 32GB RAM, GPT-3.5 + GPT-4 (~$250/mo)
+      Large: 16 vCPU, 64GB RAM, GPT-4 + GPU compute (~$600/mo)
 
   - name: region
     label: Azure Region
@@ -53,24 +67,6 @@ parameters:
       - westeurope
     default: eastus
     description: Azure region for deployment. Choose one close to your team.
-
-  - name: enable_gpt4
-    label: Enable GPT-4
-    type: boolean
-    required: false
-    default: "true"
-    description: Deploy GPT-4 model (higher cost but more capable)
-
-  - name: compute_size
-    label: Compute Size
-    type: select
-    required: true
-    options:
-      - Standard_DS3_v2
-      - Standard_DS4_v2
-      - Standard_NC6s_v3
-    default: Standard_DS3_v2
-    description: VM size for compute instances. GPU (NC) recommended for training.
 
 ado_pipeline:
   project: InfrastructureTeam
