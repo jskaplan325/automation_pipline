@@ -1,0 +1,90 @@
+id: dev-environment
+name: Developer Environment
+description: |
+  A standard developer environment with common Azure services for building and testing applications.
+
+  **What's included:**
+  - Azure App Service (Web App)
+  - Azure SQL Database (Basic tier)
+  - Azure Storage Account
+  - Application Insights
+  - Key Vault for secrets
+
+  **Best for:**
+  Developers who need a quick, standardized environment for building web applications or APIs.
+
+  **Features:**
+  - Auto-scaling capable
+  - Built-in CI/CD slot for deployments
+  - Managed SSL certificates
+  - Centralized logging
+
+category: development
+icon: code
+skill_level: beginner
+tags:
+  - web-app
+  - sql
+  - development
+  - app-service
+
+estimated_monthly_cost_usd: 50-100
+cost_breakdown:
+  - component: App Service (B1)
+    estimate: "$15/month"
+  - component: SQL Database (Basic)
+    estimate: "$5/month"
+  - component: Storage Account
+    estimate: "$5-20/month"
+  - component: Application Insights
+    estimate: "$10-30/month"
+  - component: Key Vault
+    estimate: "$5/month"
+
+parameters:
+  - name: app_name
+    label: Application Name
+    type: string
+    required: true
+    description: Name for your application (used in URLs)
+
+  - name: region
+    label: Azure Region
+    type: select
+    required: true
+    options:
+      - eastus
+      - eastus2
+      - westus2
+      - centralus
+      - northeurope
+      - westeurope
+    default: eastus
+
+  - name: runtime_stack
+    label: Runtime Stack
+    type: select
+    required: true
+    options:
+      - dotnet-8
+      - node-20
+      - python-3.11
+      - java-17
+    default: node-20
+    description: Programming language/runtime for your app
+
+  - name: sql_size
+    label: SQL Database Size
+    type: select
+    required: true
+    options:
+      - Basic
+      - Standard-S0
+      - Standard-S1
+    default: Basic
+    description: Basic for dev/test, Standard for production workloads
+
+ado_pipeline:
+  project: InfrastructureTeam
+  pipeline_id: 30
+  branch: main

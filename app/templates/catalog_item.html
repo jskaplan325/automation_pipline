@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}{{ item.name }} - Terraform Portal{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav class="mb-6">
+    <ol class="flex items-center space-x-2 text-sm text-gray-500">
+        <li><a href="/catalog" class="hover:text-gray-700">Catalog</a></li>
+        <li><span>/</span></li>
+        <li class="text-gray-900">{{ item.name }}</li>
+    </ol>
+</nav>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Main content -->
+    <div class="lg:col-span-2">
+        <div class="bg-white rounded-lg shadow-sm border p-6">
+            <div class="flex items-start justify-between mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">{{ item.name }}</h1>
+                    <div class="mt-2 flex items-center space-x-3">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded text-sm font-medium bg-gray-100 text-gray-800">
+                            {{ item.category | capitalize }}
+                        </span>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                            {% if item.skill_level == 'beginner' %}bg-green-100 text-green-800
+                            {% elif item.skill_level == 'intermediate' %}bg-yellow-100 text-yellow-800
+                            {% else %}bg-red-100 text-red-800{% endif %}">
+                            {{ item.skill_level | capitalize }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="prose max-w-none">
+                <h2 class="text-lg font-semibold text-gray-900 mb-3">Description</h2>
+                <div class="text-gray-600 whitespace-pre-line">{{ item.description }}</div>
+            </div>
+
+            {% if item.parameters %}
+            <div class="mt-8">
+                <h2 class="text-lg font-semibold text-gray-900 mb-3">Required Parameters</h2>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <ul class="space-y-3">
+                        {% for param in item.parameters %}
+                        <li class="flex items-start">
+                            <span class="flex-shrink-0 h-5 w-5 text-blue-500 mr-2">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </span>
+                            <div>
+                                <span class="font-medium text-gray-900">{{ param.label }}</span>
+                                {% if not param.required %}
+                                <span class="text-xs text-gray-500">(optional)</span>
+                                {% endif %}
+                                {% if param.description %}
+                                <p class="text-sm text-gray-600 mt-1">{{ param.description }}</p>
+                                {% endif %}
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="lg:col-span-1">
+        <!-- Cost card -->
+        <div class="bg-white rounded-lg shadow-sm border p-6 mb-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Estimated Cost</h2>
+
+            <div class="text-center mb-4 p-4 bg-blue-50 rounded-lg">
+                <span class="text-3xl font-bold text-blue-600">${{ item.estimated_monthly_cost_usd }}</span>
+                <span class="text-gray-600">/month</span>
+            </div>
+
+            {% if item.cost_breakdown %}
+            <h3 class="text-sm font-medium text-gray-700 mb-2">Cost Breakdown</h3>
+            <ul class="space-y-2">
+                {% for cost in item.cost_breakdown %}
+                <li class="flex justify-between text-sm">
+                    <span class="text-gray-600">{{ cost.component }}</span>
+                    <span class="text-gray-900 font-medium">{{ cost.estimate }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            <p class="mt-4 text-xs text-gray-500">
+                * Estimates are approximate and may vary based on usage. Actual costs will depend on resource consumption.
+            </p>
+        </div>
+
+        <!-- Request button -->
+        <div class="bg-white rounded-lg shadow-sm border p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Ready to Deploy?</h2>
+            <p class="text-sm text-gray-600 mb-4">
+                Submit a request to deploy this template. An approver will review your request before deployment begins.
+            </p>
+            <a href="/requests/new/{{ item.id }}"
+               class="block w-full text-center px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                Request Deployment
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

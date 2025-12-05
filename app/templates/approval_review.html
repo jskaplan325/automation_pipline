@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}Review Request - Terraform Portal{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav class="mb-6">
+    <ol class="flex items-center space-x-2 text-sm text-gray-500">
+        <li><a href="/approvals" class="hover:text-gray-700">Approvals</a></li>
+        <li><span>/</span></li>
+        <li class="text-gray-900">Review</li>
+    </ol>
+</nav>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Main content -->
+    <div class="lg:col-span-2">
+        <div class="bg-white rounded-lg shadow-sm border p-6">
+            <h1 class="text-2xl font-bold text-gray-900 mb-6">Review Deployment Request</h1>
+
+            <!-- Template info -->
+            <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                <h2 class="text-lg font-semibold text-gray-900 mb-2">
+                    {% if catalog_item %}{{ catalog_item.name }}{% else %}{{ deployment_request.catalog_item_id }}{% endif %}
+                </h2>
+                {% if catalog_item %}
+                <p class="text-sm text-gray-600">{{ catalog_item.description_short }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Requester info -->
+            <div class="mb-6">
+                <h3 class="text-sm font-medium text-gray-700 mb-2">Requested by</h3>
+                <div class="flex items-center">
+                    <div class="h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center">
+                        <span class="text-gray-600 font-medium">{{ deployment_request.requester_name[0] | upper }}</span>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-900">{{ deployment_request.requester_name }}</p>
+                        <p class="text-sm text-gray-500">{{ deployment_request.requester_email }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Parameters -->
+            <div class="mb-6">
+                <h3 class="text-sm font-medium text-gray-700 mb-2">Requested Parameters</h3>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    {% if deployment_request.parameters %}
+                    <dl class="space-y-2">
+                        {% for key, value in deployment_request.parameters.items() %}
+                        <div class="flex justify-between">
+                            <dt class="text-sm text-gray-600">{{ key }}</dt>
+                            <dd class="text-sm font-medium text-gray-900">{{ value }}</dd>
+                        </div>
+                        {% endfor %}
+                    </dl>
+                    {% else %}
+                    <p class="text-sm text-gray-500">No parameters specified</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="border-t pt-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Decision</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Approve -->
+                    <form action="/approvals/{{ deployment_request.id }}/approve" method="POST">
+                        <button type="submit" class="w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center">
+                            <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            Approve Request
+                        </button>
+                    </form>
+
+                    <!-- Reject - shows modal -->
+                    <button
+                        type="button"
+                        onclick="document.getElementById('reject-modal').classList.remove('hidden')"
+                        class="w-full px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center justify-center"
+                    >
+                        <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                        Reject Request
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="lg:col-span-1">
+        <!-- Cost info -->
+        {% if catalog_item %}
+        <div class="bg-white rounded-lg shadow-sm border p-6 mb-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Cost Impact</h2>
+            <div class="text-center p-4 bg-yellow-50 rounded-lg">
+                <span class="text-3xl font-bold text-yellow-600">${{ catalog_item.estimated_monthly_cost_usd }}</span>
+                <span class="text-gray-600">/month</span>
+            </div>
+
+            {% if catalog_item.cost_breakdown %}
+            <h3 class="text-sm font-medium text-gray-700 mt-4 mb-2">Breakdown</h3>
+            <ul class="space-y-1">
+                {% for cost in catalog_item.cost_breakdown %}
+                <li class="flex justify-between text-sm">
+                    <span class="text-gray-600">{{ cost.component }}</span>
+                    <span class="text-gray-900">{{ cost.estimate }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Request info -->
+        <div class="bg-white rounded-lg shadow-sm border p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Request Info</h2>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-xs text-gray-500 uppercase">Request ID</dt>
+                    <dd class="text-sm font-mono text-gray-900">{{ deployment_request.id[:8] }}...</dd>
+                </div>
+                <div>
+                    <dt class="text-xs text-gray-500 uppercase">Submitted</dt>
+                    <dd class="text-sm text-gray-900">{{ deployment_request.created_at.strftime('%Y-%m-%d %H:%M') }}</dd>
+                </div>
+                {% if catalog_item %}
+                <div>
+                    <dt class="text-xs text-gray-500 uppercase">Skill Level</dt>
+                    <dd class="text-sm text-gray-900">{{ catalog_item.skill_level | capitalize }}</dd>
+                </div>
+                {% endif %}
+            </dl>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div id="reject-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Reject Request</h3>
+        <form action="/approvals/{{ deployment_request.id }}/reject" method="POST">
+            <div class="mb-4">
+                <label for="reason" class="block text-sm font-medium text-gray-700 mb-1">
+                    Reason for rejection <span class="text-red-500">*</span>
+                </label>
+                <textarea
+                    id="reason"
+                    name="reason"
+                    rows="3"
+                    required
+                    placeholder="Please provide a reason for rejecting this request..."
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                ></textarea>
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button
+                    type="button"
+                    onclick="document.getElementById('reject-modal').classList.add('hidden')"
+                    class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                    Cancel
+                </button>
+                <button
+                    type="submit"
+                    class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                    Confirm Rejection
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}Request Details - Terraform Portal{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav class="mb-6">
+    <ol class="flex items-center space-x-2 text-sm text-gray-500">
+        <li><a href="/requests" class="hover:text-gray-700">My Requests</a></li>
+        <li><span>/</span></li>
+        <li class="text-gray-900">{{ deployment_request.id[:8] }}...</li>
+    </ol>
+</nav>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Main content -->
+    <div class="lg:col-span-2">
+        <div class="bg-white rounded-lg shadow-sm border p-6">
+            <div class="flex items-start justify-between mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">
+                        {% if catalog_item %}{{ catalog_item.name }}{% else %}{{ deployment_request.catalog_item_id }}{% endif %}
+                    </h1>
+                    <p class="text-sm text-gray-500 mt-1">Request ID: {{ deployment_request.id }}</p>
+                </div>
+                {% set status = deployment_request.status.value %}
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                    {% if status == 'pending_approval' %}bg-yellow-100 text-yellow-800
+                    {% elif status == 'approved' %}bg-blue-100 text-blue-800
+                    {% elif status == 'rejected' %}bg-red-100 text-red-800
+                    {% elif status == 'deploying' %}bg-purple-100 text-purple-800
+                    {% elif status == 'completed' %}bg-green-100 text-green-800
+                    {% elif status == 'failed' %}bg-red-100 text-red-800
+                    {% endif %}">
+                    {{ status | replace('_', ' ') | title }}
+                </span>
+            </div>
+
+            <!-- Status message -->
+            {% if status == 'pending_approval' %}
+            <div class="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p class="text-sm text-yellow-700">
+                    Your request is pending approval. An approver will review it soon.
+                </p>
+            </div>
+            {% elif status == 'rejected' %}
+            <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p class="text-sm text-red-700">
+                    <strong>Request rejected:</strong> {{ deployment_request.rejection_reason or 'No reason provided' }}
+                </p>
+            </div>
+            {% elif status == 'deploying' %}
+            <div class="mb-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                <p class="text-sm text-purple-700">
+                    Deployment is in progress. This may take several minutes.
+                </p>
+                {% if deployment_request.ado_build_url %}
+                <a href="{{ deployment_request.ado_build_url }}" target="_blank" class="text-purple-600 hover:underline text-sm">
+                    View in Azure DevOps &rarr;
+                </a>
+                {% endif %}
+            </div>
+            {% elif status == 'completed' %}
+            <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <p class="text-sm text-green-700">
+                    Deployment completed successfully!
+                </p>
+                {% if deployment_request.ado_build_url %}
+                <a href="{{ deployment_request.ado_build_url }}" target="_blank" class="text-green-600 hover:underline text-sm">
+                    View in Azure DevOps &rarr;
+                </a>
+                {% endif %}
+            </div>
+            {% elif status == 'failed' %}
+            <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p class="text-sm text-red-700">
+                    Deployment failed. Please contact the infrastructure team for assistance.
+                </p>
+                {% if deployment_request.ado_build_url %}
+                <a href="{{ deployment_request.ado_build_url }}" target="_blank" class="text-red-600 hover:underline text-sm">
+                    View in Azure DevOps &rarr;
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Parameters -->
+            <h2 class="text-lg font-semibold text-gray-900 mb-3">Request Parameters</h2>
+            <div class="bg-gray-50 rounded-lg p-4">
+                {% if deployment_request.parameters %}
+                <dl class="space-y-2">
+                    {% for key, value in deployment_request.parameters.items() %}
+                    <div class="flex justify-between">
+                        <dt class="text-sm text-gray-600">{{ key }}</dt>
+                        <dd class="text-sm font-medium text-gray-900">{{ value }}</dd>
+                    </div>
+                    {% endfor %}
+                </dl>
+                {% else %}
+                <p class="text-sm text-gray-500">No parameters specified</p>
+                {% endif %}
+            </div>
+
+            <!-- Deployment output -->
+            {% if deployment_request.deployment_output %}
+            <h2 class="text-lg font-semibold text-gray-900 mt-6 mb-3">Deployment Output</h2>
+            <pre class="bg-gray-900 text-green-400 p-4 rounded-lg text-sm overflow-x-auto">{{ deployment_request.deployment_output }}</pre>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="lg:col-span-1">
+        <div class="bg-white rounded-lg shadow-sm border p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Timeline</h2>
+            <ul class="space-y-4">
+                <li class="flex items-start">
+                    <div class="flex-shrink-0 h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <svg class="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-900">Request submitted</p>
+                        <p class="text-xs text-gray-500">{{ deployment_request.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                        <p class="text-xs text-gray-500">by {{ deployment_request.requester_name }}</p>
+                    </div>
+                </li>
+
+                {% if deployment_request.approved_at %}
+                <li class="flex items-start">
+                    <div class="flex-shrink-0 h-8 w-8 {% if status == 'rejected' %}bg-red-100{% else %}bg-green-100{% endif %} rounded-full flex items-center justify-center">
+                        {% if status == 'rejected' %}
+                        <svg class="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                        {% else %}
+                        <svg class="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        {% endif %}
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-900">
+                            {% if status == 'rejected' %}Request rejected{% else %}Request approved{% endif %}
+                        </p>
+                        <p class="text-xs text-gray-500">{{ deployment_request.approved_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                        <p class="text-xs text-gray-500">by {{ deployment_request.approved_by }}</p>
+                    </div>
+                </li>
+                {% endif %}
+
+                {% if status in ['deploying', 'completed', 'failed'] %}
+                <li class="flex items-start">
+                    <div class="flex-shrink-0 h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
+                        <svg class="h-4 w-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-900">Deployment started</p>
+                        {% if deployment_request.ado_build_id %}
+                        <p class="text-xs text-gray-500">Build #{{ deployment_request.ado_build_id }}</p>
+                        {% endif %}
+                    </div>
+                </li>
+                {% endif %}
+
+                {% if status == 'completed' %}
+                <li class="flex items-start">
+                    <div class="flex-shrink-0 h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
+                        <svg class="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-900">Deployment completed</p>
+                    </div>
+                </li>
+                {% elif status == 'failed' %}
+                <li class="flex items-start">
+                    <div class="flex-shrink-0 h-8 w-8 bg-red-100 rounded-full flex items-center justify-center">
+                        <svg class="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-900">Deployment failed</p>
+                    </div>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+
+        {% if catalog_item %}
+        <div class="bg-white rounded-lg shadow-sm border p-6 mt-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-2">Cost Estimate</h2>
+            <p class="text-2xl font-bold text-blue-600">${{ catalog_item.estimated_monthly_cost_usd }}<span class="text-sm font-normal text-gray-500">/month</span></p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,96 @@
+id: vector-playground
+name: Vector Database Playground
+description: |
+  A complete environment for experimenting with vector databases and building semantic search or RAG (Retrieval-Augmented Generation) applications.
+
+  **What's included:**
+  - Azure Cosmos DB with vector search enabled
+  - MongoDB vCore cluster for document storage
+  - Azure OpenAI embeddings endpoint
+  - Sample Jupyter notebooks to get started
+  - Application Insights for monitoring
+
+  **Best for:**
+  Teams building semantic search, recommendation systems, or RAG applications who want to compare different vector database approaches.
+
+  **Use Cases:**
+  - Semantic document search
+  - Product recommendations
+  - Question-answering over custom data
+  - Chatbots with knowledge retrieval
+
+  **Getting Started:**
+  You'll receive connection strings for both Cosmos DB and MongoDB. Sample notebooks show how to generate embeddings and perform similarity searches.
+
+category: data
+icon: database
+skill_level: intermediate
+tags:
+  - vector-database
+  - cosmos-db
+  - mongodb
+  - embeddings
+  - rag
+
+estimated_monthly_cost_usd: 200-400
+cost_breakdown:
+  - component: Cosmos DB (serverless)
+    estimate: "$50-150/month"
+  - component: MongoDB vCore (M10)
+    estimate: "$100-150/month"
+  - component: Azure OpenAI Embeddings
+    estimate: "$20-50/month"
+  - component: Storage & Networking
+    estimate: "$30-50/month"
+
+parameters:
+  - name: environment_name
+    label: Environment Name
+    type: string
+    required: true
+    description: A unique name for this playground (lowercase, alphanumeric)
+
+  - name: region
+    label: Azure Region
+    type: select
+    required: true
+    options:
+      - eastus
+      - westus2
+      - northeurope
+    default: eastus
+    description: Azure region. Must support Cosmos DB vector search.
+
+  - name: cosmos_throughput
+    label: Cosmos DB Throughput
+    type: select
+    required: true
+    options:
+      - serverless
+      - 400-ru
+      - 1000-ru
+    default: serverless
+    description: Serverless is pay-per-use, provisioned RUs for predictable workloads.
+
+  - name: mongodb_tier
+    label: MongoDB Tier
+    type: select
+    required: true
+    options:
+      - M10
+      - M20
+      - M30
+    default: M10
+    description: MongoDB vCore cluster size. M10 is suitable for development.
+
+  - name: enable_notebooks
+    label: Deploy Sample Notebooks
+    type: boolean
+    required: false
+    default: "true"
+    description: Include Jupyter notebooks with example code
+
+ado_pipeline:
+  project: InfrastructureTeam
+  pipeline_id: 45
+  branch: main

@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Catalog - Terraform Portal{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Infrastructure Catalog</h1>
+    <p class="mt-2 text-gray-600">Browse available Terraform templates and request deployments</p>
+</div>
+
+<!-- Search and filters -->
+<div class="mb-6 flex flex-col sm:flex-row gap-4">
+    <form action="/catalog" method="get" class="flex-1">
+        <div class="relative">
+            <input
+                type="text"
+                name="search"
+                value="{{ search_query }}"
+                placeholder="Search templates..."
+                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </div>
+        </div>
+    </form>
+
+    <!-- Category filter -->
+    <div class="flex gap-2 flex-wrap">
+        <a href="/catalog"
+           class="px-4 py-2 rounded-lg text-sm font-medium {% if not selected_category %}bg-blue-600 text-white{% else %}bg-white text-gray-700 border border-gray-300 hover:bg-gray-50{% endif %}">
+            All
+        </a>
+        {% for category in categories %}
+        <a href="/catalog?category={{ category }}"
+           class="px-4 py-2 rounded-lg text-sm font-medium {% if selected_category == category %}bg-blue-600 text-white{% else %}bg-white text-gray-700 border border-gray-300 hover:bg-gray-50{% endif %}">
+            {{ category | capitalize }}
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Catalog grid -->
+{% if items %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for item in items %}
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+        <div class="p-6">
+            <!-- Header -->
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-semibold text-gray-900">{{ item.name }}</h3>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                            {{ item.category }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <p class="text-gray-600 text-sm mb-4 line-clamp-3">
+                {{ item.description_short }}
+            </p>
+
+            <!-- Cost estimate -->
+            <div class="mb-4 p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-600">Est. Monthly Cost</span>
+                    <span class="text-lg font-semibold text-gray-900">${{ item.estimated_monthly_cost_usd }}</span>
+                </div>
+            </div>
+
+            <!-- Skill level badge -->
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-xs text-gray-500">Skill Level</span>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                    {% if item.skill_level == 'beginner' %}bg-green-100 text-green-800
+                    {% elif item.skill_level == 'intermediate' %}bg-yellow-100 text-yellow-800
+                    {% else %}bg-red-100 text-red-800{% endif %}">
+                    {{ item.skill_level | capitalize }}
+                </span>
+            </div>
+
+            <!-- Action button -->
+            <a href="/catalog/{{ item.id }}"
+               class="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                View Details
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-12">
+    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    <h3 class="mt-2 text-sm font-medium text-gray-900">No templates found</h3>
+    <p class="mt-1 text-sm text-gray-500">
+        {% if search_query %}
+        No templates match "{{ search_query }}". Try a different search term.
+        {% else %}
+        No templates are currently available in the catalog.
+        {% endif %}
+    </p>
+</div>
+{% endif %}
+{% endblock %}
