@@ -1,0 +1,110 @@
+id: serverless-api
+name: Serverless API Platform
+description: |
+  Build scalable, event-driven APIs with Azure Functions, API Management, and supporting services - pay only for what you use.
+
+  **What's included:**
+  - Azure Functions (Consumption or Premium plan)
+  - Azure API Management (Developer tier)
+  - Azure Service Bus for messaging
+  - Azure Cosmos DB (serverless) for data
+  - Application Insights monitoring
+  - Key Vault for secrets
+
+  **Features:**
+  - Auto-scale from zero to thousands of requests
+  - Built-in API gateway with rate limiting
+  - Async processing with message queues
+  - Global distribution ready
+  - CI/CD pipeline templates included
+
+  **Best for:**
+  Teams building REST APIs, webhooks, event processors, or microservices who want to minimize infrastructure management and optimize costs.
+
+  **Supported Runtimes:**
+  - .NET 8
+  - Node.js 20
+  - Python 3.11
+  - Java 17
+
+category: compute
+icon: zap
+skill_level: beginner
+tags:
+  - serverless
+  - functions
+  - api
+  - event-driven
+  - microservices
+
+estimated_monthly_cost_usd: 30-300
+cost_breakdown:
+  - component: Azure Functions (Consumption)
+    estimate: "$0-50/month"
+  - component: API Management (Developer)
+    estimate: "$50/month"
+  - component: Cosmos DB (serverless)
+    estimate: "$5-100/month"
+  - component: Service Bus (Basic)
+    estimate: "$10/month"
+  - component: Application Insights
+    estimate: "$10-50/month"
+
+parameters:
+  - name: api_name
+    label: API Name
+    type: string
+    required: true
+    description: Name for your API platform (used in URLs)
+
+  - name: region
+    label: Azure Region
+    type: select
+    required: true
+    options:
+      - eastus
+      - eastus2
+      - westus2
+      - northeurope
+      - westeurope
+    default: eastus
+
+  - name: runtime_stack
+    label: Function Runtime
+    type: select
+    required: true
+    options:
+      - dotnet-8
+      - node-20
+      - python-3.11
+      - java-17
+    default: node-20
+
+  - name: functions_plan
+    label: Functions Plan
+    type: select
+    required: true
+    options:
+      - consumption
+      - premium
+    default: consumption
+    description: Consumption=pay per execution, Premium=pre-warmed instances
+
+  - name: enable_cosmosdb
+    label: Include Cosmos DB
+    type: boolean
+    required: false
+    default: "true"
+    description: Deploy serverless Cosmos DB for data storage
+
+  - name: enable_servicebus
+    label: Include Service Bus
+    type: boolean
+    required: false
+    default: "true"
+    description: Deploy Service Bus for async messaging
+
+ado_pipeline:
+  project: InfrastructureTeam
+  pipeline_id: 40
+  branch: main

@@ -1,0 +1,104 @@
+id: ai-foundry-rag
+name: AI Foundry RAG Solution
+description: |
+  A complete Retrieval-Augmented Generation (RAG) solution built on Azure AI Foundry with OpenAI, enabling you to build chatbots and search over your own documents.
+
+  **What's included:**
+  - Azure AI Foundry Hub and Project
+  - Azure OpenAI with GPT-4 and Embeddings
+  - Azure AI Search for vector indexing
+  - Azure Blob Storage for document upload
+  - Prompt Flow for orchestration
+  - Sample RAG pipeline template
+
+  **Use Cases:**
+  - Enterprise Q&A over internal documents
+  - Customer support chatbot with knowledge base
+  - Legal/compliance document search
+  - Technical documentation assistant
+
+  **How RAG Works:**
+  1. Upload documents to blob storage
+  2. Documents are chunked and embedded
+  3. Vectors stored in AI Search
+  4. User asks a question
+  5. Relevant chunks retrieved and sent to GPT-4
+  6. GPT-4 generates answer based on your documents
+
+  **Best for:**
+  Teams building AI assistants that need to answer questions from company-specific data rather than general knowledge.
+
+category: ai
+icon: brain
+skill_level: intermediate
+tags:
+  - rag
+  - openai
+  - ai-search
+  - foundry
+  - chatbot
+  - embeddings
+
+estimated_monthly_cost_usd: 300-800
+cost_breakdown:
+  - component: AI Foundry Hub
+    estimate: "$50/month"
+  - component: Azure OpenAI (GPT-4 + Embeddings)
+    estimate: "$100-400/month"
+  - component: Azure AI Search (Basic)
+    estimate: "$75/month"
+  - component: Storage & Compute
+    estimate: "$75-275/month"
+
+parameters:
+  - name: project_name
+    label: Project Name
+    type: string
+    required: true
+    description: Name for your RAG project (lowercase, hyphens allowed)
+
+  - name: region
+    label: Azure Region
+    type: select
+    required: true
+    options:
+      - eastus
+      - eastus2
+      - westus
+      - swedencentral
+    default: eastus
+    description: Must support both OpenAI and AI Search
+
+  - name: search_tier
+    label: AI Search Tier
+    type: select
+    required: true
+    options:
+      - free
+      - basic
+      - standard
+    default: basic
+    description: Free for testing (50MB), Basic for small projects, Standard for production
+
+  - name: gpt_model
+    label: GPT Model
+    type: select
+    required: true
+    options:
+      - gpt-4
+      - gpt-4-turbo
+      - gpt-35-turbo
+    default: gpt-4
+    description: GPT-4 recommended for best quality answers
+
+  - name: deploy_sample_pipeline
+    label: Deploy Sample RAG Pipeline
+    type: boolean
+    required: false
+    default: "true"
+    description: Include a working Prompt Flow template to get started quickly
+
+ado_pipeline:
+  project: InfrastructureTeam
+  pipeline_id: 51
+  branch: main

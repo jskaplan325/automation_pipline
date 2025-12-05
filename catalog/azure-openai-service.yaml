@@ -1,0 +1,93 @@
+id: azure-openai-service
+name: Azure OpenAI Service
+description: |
+  Deploy a standalone Azure OpenAI Service with your choice of models for building AI-powered applications.
+
+  **What's included:**
+  - Azure OpenAI resource with selected models
+  - API key management via Key Vault
+  - Application Insights for usage monitoring
+  - Private endpoint option for secure access
+
+  **Available Models:**
+  - GPT-4 / GPT-4 Turbo (most capable, best for complex tasks)
+  - GPT-3.5 Turbo (fast and cost-effective)
+  - Text Embedding Ada (for vector search/RAG)
+  - DALL-E 3 (image generation)
+
+  **Best for:**
+  Teams who want direct API access to OpenAI models without the full AI Foundry workspace. Ideal for developers building chatbots, content generation, or code assistance features.
+
+  **Getting Started:**
+  After deployment, you'll receive your API endpoint and instructions for retrieving your API key from Key Vault.
+
+category: ai
+icon: brain
+skill_level: beginner
+tags:
+  - openai
+  - gpt-4
+  - api
+  - cognitive-services
+
+estimated_monthly_cost_usd: 50-500
+cost_breakdown:
+  - component: Azure OpenAI (usage-based)
+    estimate: "$50-500/month"
+  - component: Key Vault
+    estimate: "$5/month"
+  - component: Application Insights
+    estimate: "$10-20/month"
+
+parameters:
+  - name: service_name
+    label: Service Name
+    type: string
+    required: true
+    description: Name for your OpenAI service (lowercase, alphanumeric, hyphens)
+
+  - name: region
+    label: Azure Region
+    type: select
+    required: true
+    options:
+      - eastus
+      - eastus2
+      - westus
+      - northcentralus
+      - swedencentral
+    default: eastus
+    description: Region must have OpenAI capacity available
+
+  - name: gpt4_enabled
+    label: Deploy GPT-4
+    type: boolean
+    required: false
+    default: "true"
+    description: Deploy GPT-4 model (higher cost, more capable)
+
+  - name: gpt35_enabled
+    label: Deploy GPT-3.5 Turbo
+    type: boolean
+    required: false
+    default: "true"
+    description: Deploy GPT-3.5 Turbo (faster, lower cost)
+
+  - name: embedding_enabled
+    label: Deploy Embedding Model
+    type: boolean
+    required: false
+    default: "false"
+    description: Deploy text-embedding-ada-002 for vector search
+
+  - name: private_endpoint
+    label: Enable Private Endpoint
+    type: boolean
+    required: false
+    default: "false"
+    description: Restrict access to private network only
+
+ado_pipeline:
+  project: InfrastructureTeam
+  pipeline_id: 50
+  branch: main

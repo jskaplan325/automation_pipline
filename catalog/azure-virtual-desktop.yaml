@@ -1,0 +1,112 @@
+id: azure-virtual-desktop
+name: Azure Virtual Desktop
+description: |
+  Deploy a secure Azure Virtual Desktop environment for remote workforce access to Windows desktops and applications.
+
+  **What's included:**
+  - AVD Host Pool with session hosts
+  - Windows 11 Enterprise multi-session
+  - Azure Files for user profiles (FSLogix)
+  - Azure AD Join (no domain controller needed)
+  - Network Security Groups
+  - Azure Monitor for diagnostics
+
+  **Features:**
+  - Multi-session Windows 11 (cost-effective)
+  - Profile roaming with FSLogix
+  - Conditional Access integration
+  - Auto-scale based on schedule or demand
+  - Microsoft 365 Apps pre-installed option
+
+  **Best for:**
+  Organizations enabling remote work, contractors needing secure access, or teams requiring standardized desktop environments.
+
+  **User Access:**
+  Users connect via the Remote Desktop client (Windows, Mac, iOS, Android, Web) using their Azure AD credentials.
+
+category: infrastructure
+icon: monitor
+skill_level: intermediate
+tags:
+  - virtual-desktop
+  - remote-work
+  - vdi
+  - windows
+  - avd
+
+estimated_monthly_cost_usd: 200-800
+cost_breakdown:
+  - component: Session Hosts (2x Standard_D4s_v3)
+    estimate: "$150-400/month"
+  - component: Azure Files (Premium)
+    estimate: "$50-150/month"
+  - component: Networking
+    estimate: "$20-50/month"
+  - component: Windows Licensing
+    estimate: "Included with M365"
+
+parameters:
+  - name: workspace_name
+    label: Workspace Name
+    type: string
+    required: true
+    description: Friendly name for the AVD workspace
+
+  - name: region
+    label: Azure Region
+    type: select
+    required: true
+    options:
+      - eastus
+      - eastus2
+      - westus2
+      - centralus
+      - northeurope
+      - westeurope
+    default: eastus
+
+  - name: host_count
+    label: Number of Session Hosts
+    type: select
+    required: true
+    options:
+      - "1"
+      - "2"
+      - "3"
+      - "5"
+    default: "2"
+    description: Each host supports ~10-15 concurrent users
+
+  - name: host_size
+    label: Host VM Size
+    type: select
+    required: true
+    options:
+      - Standard_D2s_v3
+      - Standard_D4s_v3
+      - Standard_D8s_v3
+    default: Standard_D4s_v3
+    description: D4 recommended for general office work
+
+  - name: install_m365
+    label: Pre-install Microsoft 365 Apps
+    type: boolean
+    required: false
+    default: "true"
+    description: Include Word, Excel, PowerPoint, Outlook, Teams
+
+  - name: profile_storage_gb
+    label: Profile Storage (GB)
+    type: select
+    required: true
+    options:
+      - "100"
+      - "256"
+      - "512"
+    default: "100"
+    description: Storage for user profiles (FSLogix)
+
+ado_pipeline:
+  project: InfrastructureTeam
+  pipeline_id: 70
+  branch: main

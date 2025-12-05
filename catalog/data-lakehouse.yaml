@@ -1,0 +1,107 @@
+id: data-lakehouse
+name: Azure Data Lakehouse
+description: |
+  A modern data lakehouse architecture combining Azure Data Lake Storage, Synapse Analytics, and Data Factory for enterprise analytics.
+
+  **What's included:**
+  - Azure Data Lake Storage Gen2 (Bronze/Silver/Gold zones)
+  - Azure Synapse Analytics workspace
+  - Azure Data Factory for ETL pipelines
+  - Dedicated SQL Pool (optional) or Serverless
+  - Spark pools for big data processing
+  - Power BI integration ready
+
+  **Data Zones:**
+  - **Bronze**: Raw data landing zone
+  - **Silver**: Cleaned and validated data
+  - **Gold**: Business-ready aggregations
+
+  **Best for:**
+  Data engineering teams building modern analytics platforms, data warehouses, or migrating from on-premises data solutions.
+
+  **Getting Started:**
+  Includes sample pipelines for common patterns (CSV ingestion, incremental loading) and a starter notebook for Spark.
+
+category: data
+icon: database
+skill_level: intermediate
+tags:
+  - data-lake
+  - synapse
+  - analytics
+  - etl
+  - data-factory
+  - big-data
+
+estimated_monthly_cost_usd: 300-1500
+cost_breakdown:
+  - component: Data Lake Storage
+    estimate: "$50-200/month"
+  - component: Synapse Workspace
+    estimate: "$0 (pay per query)"
+  - component: Spark Pool (when running)
+    estimate: "$100-500/month"
+  - component: Data Factory Pipelines
+    estimate: "$50-300/month"
+  - component: Dedicated SQL Pool (optional)
+    estimate: "$150-500/month"
+
+parameters:
+  - name: workspace_name
+    label: Workspace Name
+    type: string
+    required: true
+    description: Name for your Synapse workspace
+
+  - name: region
+    label: Azure Region
+    type: select
+    required: true
+    options:
+      - eastus
+      - eastus2
+      - westus2
+      - northeurope
+      - westeurope
+    default: eastus
+
+  - name: storage_redundancy
+    label: Storage Redundancy
+    type: select
+    required: true
+    options:
+      - LRS
+      - GRS
+      - ZRS
+    default: LRS
+    description: LRS=Local, GRS=Geo-redundant, ZRS=Zone-redundant
+
+  - name: enable_spark
+    label: Enable Spark Pool
+    type: boolean
+    required: false
+    default: "true"
+    description: Deploy a Spark pool for big data processing
+
+  - name: spark_node_size
+    label: Spark Node Size
+    type: select
+    required: false
+    options:
+      - Small
+      - Medium
+      - Large
+    default: Small
+    description: Small=4 vCPU, Medium=8 vCPU, Large=16 vCPU
+
+  - name: enable_dedicated_sql
+    label: Enable Dedicated SQL Pool
+    type: boolean
+    required: false
+    default: "false"
+    description: Deploy dedicated SQL pool (higher cost, better performance)
+
+ado_pipeline:
+  project: InfrastructureTeam
+  pipeline_id: 60
+  branch: main

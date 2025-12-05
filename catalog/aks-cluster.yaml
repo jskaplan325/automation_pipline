@@ -1,0 +1,109 @@
+id: aks-cluster
+name: Azure Kubernetes Service (AKS)
+description: |
+  Deploy a production-ready Azure Kubernetes Service cluster for running containerized applications at scale.
+
+  **What's included:**
+  - AKS cluster with auto-scaling node pools
+  - Azure Container Registry for images
+  - Azure Monitor and Log Analytics
+  - Network policies and Azure CNI
+  - Key Vault integration for secrets
+  - Optional ingress controller
+
+  **Features:**
+  - Automatic OS and runtime updates
+  - Horizontal pod autoscaling
+  - Cluster autoscaler for node pools
+  - Azure AD integration for RBAC
+  - Private cluster option
+
+  **Best for:**
+  Teams running microservices, APIs, or any containerized workloads that need orchestration, scaling, and high availability.
+
+  **Getting Started:**
+  After deployment, you'll receive kubectl credentials and ACR login details. A sample deployment manifest is included.
+
+category: compute
+icon: server
+skill_level: intermediate
+tags:
+  - kubernetes
+  - containers
+  - microservices
+  - docker
+  - devops
+
+estimated_monthly_cost_usd: 200-1000
+cost_breakdown:
+  - component: AKS Control Plane
+    estimate: "Free (Standard tier: $75/mo)"
+  - component: Node Pool (3x Standard_D4s_v3)
+    estimate: "$150-500/month"
+  - component: Container Registry (Basic)
+    estimate: "$5/month"
+  - component: Log Analytics
+    estimate: "$50-200/month"
+  - component: Load Balancer
+    estimate: "$20-50/month"
+
+parameters:
+  - name: cluster_name
+    label: Cluster Name
+    type: string
+    required: true
+    description: Name for your AKS cluster (lowercase, alphanumeric)
+
+  - name: region
+    label: Azure Region
+    type: select
+    required: true
+    options:
+      - eastus
+      - eastus2
+      - westus2
+      - centralus
+      - northeurope
+      - westeurope
+    default: eastus
+
+  - name: node_count
+    label: Initial Node Count
+    type: select
+    required: true
+    options:
+      - "2"
+      - "3"
+      - "5"
+    default: "3"
+    description: Number of nodes in the default pool
+
+  - name: node_size
+    label: Node VM Size
+    type: select
+    required: true
+    options:
+      - Standard_D2s_v3
+      - Standard_D4s_v3
+      - Standard_D8s_v3
+    default: Standard_D4s_v3
+    description: D2=2 vCPU/8GB, D4=4 vCPU/16GB, D8=8 vCPU/32GB
+
+  - name: enable_autoscaling
+    label: Enable Autoscaling
+    type: boolean
+    required: false
+    default: "true"
+    description: Automatically scale nodes based on demand (1-10 nodes)
+
+  - name: private_cluster
+    label: Private Cluster
+    type: boolean
+    required: false
+    default: "false"
+    description: API server only accessible from private network
+
+ado_pipeline:
+  project: InfrastructureTeam
+  pipeline_id: 35
+  branch: main
