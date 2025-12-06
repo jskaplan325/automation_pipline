@@ -37,9 +37,18 @@
                         <a href="/requests" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100">
                             My Requests
                         </a>
+                        <a href="/operations/active" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100">
+                            Deployments
+                        </a>
+                        <a href="/templates" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100">
+                            Templates
+                        </a>
                         {% if user and user.is_approver %}
                         <a href="/approvals" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100">
                             Approvals
+                        </a>
+                        <a href="/audit" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100">
+                            Audit Log
                         </a>
                         {% endif %}
                     </div>

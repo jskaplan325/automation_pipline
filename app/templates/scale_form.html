@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Scale Deployment - Terraform Portal{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-lg shadow-sm border p-6">
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">Scale Deployment</h1>
+        <p class="text-gray-600 mb-6">
+            {% if catalog_item %}{{ catalog_item.name }}{% else %}{{ deployment.catalog_item_id }}{% endif %}
+        </p>
+
+        <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div class="flex items-center">
+                <span class="text-blue-700 font-medium">Current Size:</span>
+                <span class="ml-2 px-3 py-1 bg-blue-600 text-white rounded-full text-sm font-medium uppercase">{{ current_size }}</span>
+            </div>
+        </div>
+
+        <form action="/operations/scale/{{ deployment.id }}" method="POST">
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-3">
+                    Select New Size
+                </label>
+
+                {% if catalog_item %}
+                {% for param in catalog_item.parameters %}
+                {% if param.name == 'size' %}
+                <div class="space-y-3">
+                    {% for option in param.options %}
+                    <label class="flex items-start p-4 border rounded-lg cursor-pointer hover:bg-gray-50 {% if option == current_size %}border-gray-300 bg-gray-100 opacity-50{% else %}border-gray-200{% endif %}">
+                        <input
+                            type="radio"
+                            name="new_size"
+                            value="{{ option }}"
+                            {% if option == current_size %}disabled{% endif %}
+                            class="mt-1 h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                            required
+                        >
+                        <div class="ml-3">
+                            <span class="block text-sm font-medium text-gray-900 uppercase">{{ option }}</span>
+                            {% if option == current_size %}
+                            <span class="text-xs text-gray-500">(current)</span>
+                            {% endif %}
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+
+                {% if param.description %}
+                <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                    <p class="text-sm text-gray-600 whitespace-pre-line">{{ param.description }}</p>
+                </div>
+                {% endif %}
+                {% endif %}
+                {% endfor %}
+                {% else %}
+                <div class="space-y-3">
+                    {% for size in ['small', 'medium', 'large'] %}
+                    <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 {% if size == current_size %}border-gray-300 bg-gray-100 opacity-50{% endif %}">
+                        <input
+                            type="radio"
+                            name="new_size"
+                            value="{{ size }}"
+                            {% if size == current_size %}disabled{% endif %}
+                            class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                            required
+                        >
+                        <span class="ml-3 text-sm font-medium text-gray-900 uppercase">{{ size }}</span>
+                        {% if size == current_size %}
+                        <span class="ml-2 text-xs text-gray-500">(current)</span>
+                        {% endif %}
+                    </label>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="mb-6">
+                <label for="reason" class="block text-sm font-medium text-gray-700 mb-1">
+                    Reason for scaling (optional)
+                </label>
+                <textarea
+                    id="reason"
+                    name="reason"
+                    rows="2"
+                    placeholder="e.g., Increased workload, performance optimization..."
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                ></textarea>
+            </div>
+
+            <div class="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p class="text-sm text-yellow-700">
+                    <strong>Note:</strong> Scaling may affect your monthly costs. The change will require approval before being applied.
+                </p>
+            </div>
+
+            <div class="flex justify-end space-x-3">
+                <a href="/operations/active" class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+                    Cancel
+                </a>
+                <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">
+                    Request Scale Change
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

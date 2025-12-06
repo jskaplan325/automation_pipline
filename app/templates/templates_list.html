@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}My Templates - Terraform Portal{% endblock %}
+
+{% block content %}
+<div class="mb-8 flex justify-between items-center">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-900">My Templates</h1>
+        <p class="mt-2 text-gray-600">Saved request configurations for quick deployments</p>
+    </div>
+</div>
+
+{% if templates %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for item in templates %}
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div class="flex items-start justify-between mb-3">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900">{{ item.template.name }}</h3>
+                <p class="text-sm text-gray-500">
+                    {% if item.catalog_item %}{{ item.catalog_item.name }}{% else %}{{ item.template.catalog_item_id }}{% endif %}
+                </p>
+            </div>
+            <button
+                onclick="deleteTemplate('{{ item.template.id }}')"
+                class="text-gray-400 hover:text-red-600"
+                title="Delete template"
+            >
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+            </button>
+        </div>
+
+        {% if item.template.description %}
+        <p class="text-sm text-gray-600 mb-4">{{ item.template.description }}</p>
+        {% endif %}
+
+        <!-- Saved parameters preview -->
+        <div class="mb-4 p-3 bg-gray-50 rounded-lg text-sm">
+            {% for key, value in item.template.parameters.items() %}
+            <div class="flex justify-between {% if not loop.last %}mb-1{% endif %}">
+                <span class="text-gray-500">{{ key }}:</span>
+                <span class="text-gray-900">{{ value }}</span>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Default tags -->
+        {% if item.template.default_environment_type or item.template.default_cost_center %}
+        <div class="mb-4 flex flex-wrap gap-2">
+            {% if item.template.default_environment_type %}
+            <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">{{ item.template.default_environment_type }}</span>
+            {% endif %}
+            {% if item.template.default_cost_center %}
+            <span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded">{{ item.template.default_cost_center }}</span>
+            {% endif %}
+            {% if item.template.default_expiration_days %}
+            <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">{{ item.template.default_expiration_days }} day expiry</span>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <a href="/templates/{{ item.template.id }}/use" class="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">
+            Use Template
+        </a>
+
+        <p class="mt-2 text-center text-xs text-gray-500">
+            Last updated: {{ item.template.updated_at.strftime('%Y-%m-%d') }}
+        </p>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-12 bg-white rounded-lg border">
+    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/>
+    </svg>
+    <h3 class="mt-2 text-sm font-medium text-gray-900">No saved templates</h3>
+    <p class="mt-1 text-sm text-gray-500">Save a request configuration as a template for quick reuse.</p>
+    <div class="mt-6">
+        <a href="/catalog" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            Browse Catalog
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<script>
+async function deleteTemplate(templateId) {
+    if (!confirm('Are you sure you want to delete this template?')) return;
+
+    const response = await fetch(`/templates/${templateId}`, {
+        method: 'DELETE',
+    });
+
+    if (response.ok) {
+        window.location.reload();
+    } else {
+        alert('Failed to delete template');
+    }
+}
+</script>
+{% endblock %}
