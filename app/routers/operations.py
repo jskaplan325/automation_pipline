@@ -5,7 +5,7 @@ from datetime import datetime
 
 from fastapi import APIRouter, Request, HTTPException, Depends, Form
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, HTMLResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,6 +17,11 @@ from app.services.audit_service import log_destroy_requested, log_scale_requeste
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
+
+
+def is_htmx_request(request: Request) -> bool:
+    """Check if request is from HTMX."""
+    return request.headers.get("HX-Request") == "true"
 
 
 @router.get("/active")
@@ -48,6 +53,41 @@ async def list_active_deployments(request: Request, db: AsyncSession = Depends(g
             "request": request,
             "user": user,
             "deployments": enriched,
+        },
+    )
+
+
+@router.get("/destroy/{request_id}/modal")
+async def destroy_modal(
+    request: Request,
+    request_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """Return destroy confirmation modal (HTMX)."""
+    user = get_current_user(request)
+
+    result = await db.execute(
+        select(DeploymentRequest).where(DeploymentRequest.id == request_id)
+    )
+    deployment = result.scalar_one_or_none()
+
+    if not deployment:
+        raise HTTPException(status_code=404, detail="Deployment not found")
+
+    if deployment.requester_email != user.email:
+        raise HTTPException(status_code=403, detail="Not your deployment")
+
+    if not deployment.can_destroy:
+        raise HTTPException(status_code=400, detail="Deployment cannot be destroyed")
+
+    item = catalog_service.get_by_id(deployment.catalog_item_id)
+
+    return templates.TemplateResponse(
+        "partials/destroy_modal.html",
+        {
+            "request": request,
+            "deployment": deployment,
+            "catalog_item": item,
         },
     )
 
@@ -139,6 +179,16 @@ async def create_destroy_request(
     )
 
     await db.commit()
+
+    # For HTMX requests, return success modal
+    if is_htmx_request(request):
+        return templates.TemplateResponse(
+            "partials/destroy_success.html",
+            {
+                "request": request,
+                "request_id": destroy_request.id,
+            },
+        )
 
     return RedirectResponse(url=f"/requests/{destroy_request.id}", status_code=302)
 

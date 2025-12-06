@@ -5,7 +5,7 @@ from datetime import datetime
 
 from fastapi import APIRouter, Request, HTTPException, Depends, Form
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, HTMLResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -19,6 +19,11 @@ from app.services.teams_webhook import send_deployment_notification
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
+
+
+def is_htmx_request(request: Request) -> bool:
+    """Check if request is from HTMX."""
+    return request.headers.get("HX-Request") == "true"
 
 
 @router.get("/")
@@ -180,7 +185,45 @@ async def approve_request(
     except Exception as e:
         print(f"Failed to send notifications: {e}")
 
+    # For HTMX requests, return updated row partial
+    if is_htmx_request(request):
+        return templates.TemplateResponse(
+            "partials/approval_row.html",
+            {
+                "request": deployment_request,
+                "catalog_item": catalog_item,
+                "status": "approved",
+            },
+        )
+
     return RedirectResponse(url="/approvals", status_code=302)
+
+
+@router.get("/{request_id}/reject-form")
+async def get_reject_form(
+    request: Request,
+    request_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """Return the inline rejection form (HTMX)."""
+    user = get_current_user(request)
+
+    if not user.is_approver:
+        raise HTTPException(status_code=403, detail="Approvers only")
+
+    return templates.TemplateResponse(
+        "partials/reject_form.html",
+        {
+            "request": request,
+            "request_id": request_id,
+        },
+    )
+
+
+@router.get("/{request_id}/cancel-reject")
+async def cancel_reject_form(request: Request, request_id: str):
+    """Cancel the rejection form (HTMX) - returns empty content."""
+    return HTMLResponse(content="")
 
 
 @router.post("/{request_id}/reject")
@@ -215,9 +258,11 @@ async def reject_request(
 
     await db.commit()
 
+    # Get catalog item for template response
+    catalog_item = catalog_service.get_by_id(deployment_request.catalog_item_id)
+
     # Send rejection notification
     try:
-        catalog_item = catalog_service.get_by_id(deployment_request.catalog_item_id)
         template_name = catalog_item.name if catalog_item else deployment_request.catalog_item_id
         await send_rejection_notification(
             requester_email=deployment_request.requester_email,
@@ -228,5 +273,16 @@ async def reject_request(
         )
     except Exception as e:
         print(f"Failed to send rejection notification: {e}")
+
+    # For HTMX requests, return updated row partial
+    if is_htmx_request(request):
+        return templates.TemplateResponse(
+            "partials/approval_row.html",
+            {
+                "request": deployment_request,
+                "catalog_item": catalog_item,
+                "status": "rejected",
+            },
+        )
 
     return RedirectResponse(url="/approvals", status_code=302)

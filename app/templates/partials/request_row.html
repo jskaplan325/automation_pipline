@@ -1,0 +1,57 @@
+<!-- Request row partial - for HTMX updates -->
+{% set status = request.status.value %}
+<tr id="request-row-{{ request.id }}" class="hover:bg-gray-50"
+    {% if status == 'deploying' %}
+    hx-get="/requests/{{ request.id }}/status"
+    hx-trigger="every 5s"
+    hx-swap="outerHTML"
+    {% endif %}
+>
+    <td class="px-6 py-4 whitespace-nowrap">
+        <div class="flex items-center">
+            <div class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/>
+                </svg>
+            </div>
+            <div class="ml-4">
+                <div class="text-sm font-medium text-gray-900">
+                    {% if catalog_item %}
+                    {{ catalog_item.name }}
+                    {% else %}
+                    {{ request.catalog_item_id }}
+                    {% endif %}
+                </div>
+                <div class="text-sm text-gray-500">
+                    ID: {{ request.id[:8] }}...
+                </div>
+            </div>
+        </div>
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap">
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+            {% if status == 'pending_approval' %}bg-yellow-100 text-yellow-800
+            {% elif status == 'approved' %}bg-blue-100 text-blue-800
+            {% elif status == 'rejected' %}bg-red-100 text-red-800
+            {% elif status == 'deploying' %}bg-purple-100 text-purple-800
+            {% elif status == 'completed' %}bg-green-100 text-green-800
+            {% elif status == 'failed' %}bg-red-100 text-red-800
+            {% endif %}">
+            {% if status == 'deploying' %}
+            <svg class="animate-spin h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            {% endif %}
+            {{ status | replace('_', ' ') | title }}
+        </span>
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+        {{ request.created_at.strftime('%Y-%m-%d %H:%M') }}
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm">
+        <a href="/requests/{{ request.id }}" class="text-blue-600 hover:text-blue-800">
+            View Details
+        </a>
+    </td>
+</tr>

@@ -4,16 +4,47 @@ An internal web portal for requesting Azure infrastructure deployments via pre-b
 
 ![Python](https://img.shields.io/badge/python-3.9+-blue.svg)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.109-green.svg)
+![HTMX](https://img.shields.io/badge/HTMX-1.9-purple.svg)
 ![License](https://img.shields.io/badge/license-Internal-gray.svg)
+
+## Tech Stack
+
+| Component | Technology | Rationale |
+|-----------|------------|-----------|
+| Backend | Python FastAPI | Async, excellent Azure SDK support, auto-generated API docs |
+| Frontend | Jinja2 + HTMX | Server-rendered, minimal JS, fast MVP development |
+| Database | SQLite | Zero setup for MVP, easy migration path to Azure SQL |
+| Styling | Tailwind CSS (CDN) | Clean UI without heavy build process |
 
 ## Features
 
+### Core Features
 - **Template Catalog** - Browse available Terraform templates with descriptions aimed at novice users
 - **Cost Estimates** - See estimated monthly costs before requesting deployments
 - **Request Workflow** - Submit requests, track status, view deployment results
 - **Approval System** - Approvers review requests before pipelines run
 - **ADO Integration** - Automatically triggers Azure DevOps pipelines on approval
 - **Notifications** - Email and Microsoft Teams notifications for request updates
+
+### Quick Wins & Personalization
+- **Favorites** - Save templates to favorites for quick access; filter catalog to view only favorites
+- **Request Templates** - Save parameter configurations as reusable templates
+- **Deployment Tags** - Tag deployments with cost center, environment type, and project code
+- **Environment Expiration** - Set expiration dates for temporary deployments
+
+### Operations & Lifecycle
+- **Active Deployments** - View and manage your running infrastructure
+- **Scale Operations** - Request scaling of deployed resources (with approval)
+- **Destroy Operations** - Request destruction of deployments (with approval)
+- **Resource Health** - Track health status (healthy, degraded, unhealthy) of deployments
+- **Audit Log** - Complete audit trail of all actions for compliance
+
+### Interactive UI (HTMX-powered)
+- **Live Search** - Real-time catalog filtering as you type (no page reload)
+- **Instant Favorites** - Toggle favorites with immediate visual feedback
+- **Inline Approvals** - Approve/reject requests directly from the dashboard
+- **Auto-refresh Status** - Deploying requests automatically poll for updates
+- **Modal Confirmations** - Destroy confirmations via modal dialogs
 
 ## Quick Start
 
@@ -96,12 +127,19 @@ TEAMS_WEBHOOK_URL=https://outlook.office.com/webhook/...
 │   ├── routers/
 │   │   ├── catalog.py       # Catalog browsing endpoints
 │   │   ├── requests.py      # Deployment request endpoints
-│   │   └── approvals.py     # Approval workflow endpoints
+│   │   ├── approvals.py     # Approval workflow endpoints
+│   │   ├── favorites.py     # Favorites management endpoints
+│   │   ├── templates.py     # Request templates endpoints
+│   │   ├── operations.py    # Scale/destroy operations endpoints
+│   │   └── audit.py         # Audit log endpoints
 │   ├── services/
 │   │   ├── ado_client.py    # Azure DevOps API integration
 │   │   ├── email_service.py # Email notifications
-│   │   └── teams_webhook.py # Teams notifications
-│   └── templates/           # Jinja2 HTML templates
+│   │   ├── teams_webhook.py # Teams notifications
+│   │   └── audit_service.py # Audit logging service
+│   └── templates/
+│       ├── *.html           # Full page templates
+│       └── partials/        # HTMX partial templates
 ├── catalog/                 # Terraform template definitions (YAML)
 ├── static/                  # CSS and static assets
 ├── requirements.txt

@@ -1,0 +1,32 @@
+<!-- Destroy success message - shown after HTMX submit -->
+<div id="modal-backdrop" class="fixed inset-0 modal-backdrop z-40" onclick="closeDestroyModal()"></div>
+<div id="modal-content" class="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full pointer-events-auto">
+        <div class="p-6 text-center">
+            <div class="mx-auto h-12 w-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">Destruction Request Submitted</h3>
+            <p class="text-sm text-gray-600 mb-4">
+                Your request to destroy the deployment has been submitted for approval.
+            </p>
+            <div class="flex justify-center space-x-3">
+                <button
+                    type="button"
+                    onclick="closeDestroyModal()"
+                    class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                    Close
+                </button>
+                <a
+                    href="/requests/{{ request_id }}"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                    View Request
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

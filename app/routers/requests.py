@@ -137,6 +137,34 @@ async def create_request(
     )
 
 
+@router.get("/{request_id}/status")
+async def get_request_status(
+    request: Request,
+    request_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """Get request status row for HTMX polling."""
+    user = get_current_user(request)
+
+    result = await db.execute(
+        select(DeploymentRequest).where(DeploymentRequest.id == request_id)
+    )
+    deployment_request = result.scalar_one_or_none()
+
+    if not deployment_request:
+        raise HTTPException(status_code=404, detail="Request not found")
+
+    catalog_item = catalog_service.get_by_id(deployment_request.catalog_item_id)
+
+    return templates.TemplateResponse(
+        "partials/request_row.html",
+        {
+            "request": deployment_request,
+            "catalog_item": catalog_item,
+        },
+    )
+
+
 @router.get("/{request_id}")
 async def view_request(
     request: Request,

@@ -1,0 +1,36 @@
+<!-- Inline rejection form - loaded via HTMX -->
+<div class="p-3 bg-red-50 border border-red-200 rounded-lg">
+    <form
+        hx-post="/approvals/{{ request_id }}/reject"
+        hx-target="#approval-row-{{ request_id }}"
+        hx-swap="outerHTML"
+    >
+        <label class="block text-xs font-medium text-red-800 mb-1">
+            Reason for rejection
+        </label>
+        <textarea
+            name="reason"
+            rows="2"
+            required
+            placeholder="Please provide a reason..."
+            class="w-full px-2 py-1 text-sm border border-red-300 rounded focus:ring-2 focus:ring-red-500 focus:border-transparent"
+        ></textarea>
+        <div class="flex justify-end space-x-2 mt-2">
+            <button
+                type="button"
+                hx-get="/approvals/{{ request_id }}/cancel-reject"
+                hx-target="#reject-form-{{ request_id }}"
+                hx-swap="innerHTML"
+                class="px-2 py-1 text-xs text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+            >
+                Cancel
+            </button>
+            <button
+                type="submit"
+                class="px-2 py-1 text-xs text-white bg-red-600 rounded hover:bg-red-700 transition-colors"
+            >
+                Confirm Reject
+            </button>
+        </div>
+    </form>
+</div>

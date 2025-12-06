@@ -90,9 +90,14 @@
                 Scale
             </a>
             {% endif %}
-            <a href="/operations/destroy/{{ item.deployment.id }}" class="flex-1 text-center px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium">
+            <button
+                hx-get="/operations/destroy/{{ item.deployment.id }}/modal"
+                hx-target="#modal-container"
+                hx-swap="innerHTML"
+                class="flex-1 text-center px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium"
+            >
                 Destroy
-            </a>
+            </button>
         </div>
 
         <div class="mt-3 text-center">
@@ -115,4 +120,20 @@
     </div>
 </div>
 {% endif %}
+
+<!-- Modal container for HTMX -->
+<div id="modal-container"></div>
+
+<script>
+function closeDestroyModal() {
+    document.getElementById('modal-container').innerHTML = '';
+}
+
+// Close modal on escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeDestroyModal();
+    }
+});
+</script>
 {% endblock %}
