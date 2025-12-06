@@ -36,6 +36,7 @@ class ADOPipeline:
     project: str
     pipeline_id: int
     branch: str = "main"
+    module_name: Optional[str] = None  # For generic pipeline: terraform/<module_name>/
 
 
 @dataclass
@@ -114,6 +115,7 @@ class CatalogService:
                     project=ado_data.get("project", ""),
                     pipeline_id=ado_data.get("pipeline_id", 0),
                     branch=ado_data.get("branch", "main"),
+                    module_name=ado_data.get("module_name"),
                 )
 
                 item = CatalogItem(

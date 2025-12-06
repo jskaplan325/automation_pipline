@@ -93,29 +93,39 @@ parameters:
     description: Email for notifications (optional)
 
 # Azure DevOps Pipeline Configuration
-# This is where the magic happens!
 ado_pipeline:
   project: YourADOProject       # ADO Project name (not the repo)
   pipeline_id: 123              # Pipeline ID (find in URL or pipeline settings)
   branch: main                  # Branch to run from
 
 # ============================================================
-# HOW TO FIND YOUR PIPELINE ID:
-# 1. Go to Azure DevOps > Pipelines > Your Pipeline
-# 2. Look at URL: https://dev.azure.com/org/project/_build?definitionId=123
-#    The number after definitionId= is your pipeline_id
+# OPTION A: Use the Generic Pipeline (Recommended)
+# ============================================================
+# If using the generic terraform pipeline (pipelines/terraform-generic.yml),
+# just add your Terraform to terraform/<module-name>/ and set:
 #
-# HOW PARAMETERS ARE PASSED:
-# - The portal sends parameters as ADO templateParameters
-# - In your pipeline YAML, define them like:
+#   ado_pipeline:
+#     project: YourADOProject
+#     pipeline_id: 123            # Your generic pipeline ID
+#     branch: main
+#     module_name: my-module      # Folder name under terraform/
 #
+# The generic pipeline will:
+#   1. cd terraform/<module_name>
+#   2. Run terraform with your catalog parameters as -var arguments
+#
+# ============================================================
+# OPTION B: Use a Dedicated Pipeline
+# ============================================================
+# For complex deployments, create a dedicated pipeline and point to it.
+# Parameters from the catalog are passed as ADO templateParameters.
+#
+# In your pipeline YAML:
 #   parameters:
 #     - name: project_name
 #       type: string
 #     - name: environment
 #       type: string
-#     - name: size
-#       type: string
 #
-#   Then use: ${{ parameters.project_name }}
+# Access with: ${{ parameters.project_name }}
 # ============================================================

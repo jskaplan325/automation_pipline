@@ -140,12 +140,61 @@ TEAMS_WEBHOOK_URL=https://outlook.office.com/webhook/...
 │   └── templates/
 │       ├── *.html           # Full page templates
 │       └── partials/        # HTMX partial templates
-├── catalog/                 # Terraform template definitions (YAML)
+├── catalog/                 # Catalog entries (YAML) - what users see
+├── terraform/               # Your Terraform modules (plug & play!)
+│   ├── _example/            # Example module to copy
+│   └── <your-modules>/      # Add your .tf files here
+├── pipelines/               # ADO pipeline templates
+│   └── terraform-generic.yml # Generic pipeline for any module
 ├── static/                  # CSS and static assets
 ├── requirements.txt
 ├── run.py                   # Development server runner
 └── seed_demo_data.py        # Demo data seeder
 ```
+
+## Adding Your Terraform (Plug & Play)
+
+The fastest way to add your own infrastructure:
+
+```bash
+# 1. Create your terraform module
+mkdir terraform/my-app
+cp terraform/_example/* terraform/my-app/
+# Edit the .tf files with your resources
+
+# 2. Create catalog entry
+cat > catalog/my-app.yaml << 'EOF'
+id: my-app
+name: My Application
+description: Deploys my app infrastructure
+category: development
+skill_level: beginner
+estimated_monthly_cost_usd: 50-100
+
+parameters:
+  - name: project_name
+    label: Project Name
+    type: string
+    required: true
+  - name: environment
+    label: Environment
+    type: select
+    options: [dev, test, prod]
+    default: dev
+
+ado_pipeline:
+  project: YourProject
+  pipeline_id: 123
+  module_name: my-app    # <-- Points to terraform/my-app/
+EOF
+
+# 3. Restart portal
+python run.py
+```
+
+See `terraform/README.md` for detailed documentation.
+
+---
 
 ## Connecting Your Pipelines (Plug & Play)
 

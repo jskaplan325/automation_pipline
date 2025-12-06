@@ -47,6 +47,11 @@ class ADOClient:
             f"{pipeline.pipeline_id}/runs?api-version=7.0"
         )
 
+        # Build template parameters - include module_name if using generic pipeline
+        template_params = dict(parameters)
+        if pipeline.module_name:
+            template_params["module_name"] = pipeline.module_name
+
         payload = {
             "resources": {
                 "repositories": {
@@ -55,7 +60,7 @@ class ADOClient:
                     }
                 }
             },
-            "templateParameters": parameters,
+            "templateParameters": template_params,
         }
 
         headers = {

@@ -1,0 +1,195 @@
+# Generic Terraform Pipeline
+# ===========================
+# This single pipeline can deploy ANY Terraform module in the terraform/ folder.
+# The portal passes the module name and variables as parameters.
+#
+# SETUP:
+# 1. Create this pipeline in Azure DevOps
+# 2. Note the pipeline ID (from URL: definitionId=XXX)
+# 3. Use this pipeline ID in ALL your catalog YAML entries
+# 4. Just add your Terraform code to terraform/<module-name>/
+
+trigger: none  # Only triggered by the portal
+
+parameters:
+  # Which Terraform module to deploy (folder name under terraform/)
+  - name: module_name
+    displayName: Terraform Module
+    type: string
+
+  # Common parameters - add more as needed
+  - name: project_name
+    displayName: Project Name
+    type: string
+    default: ''
+
+  - name: environment
+    displayName: Environment
+    type: string
+    default: 'dev'
+    values:
+      - dev
+      - test
+      - prod
+
+  - name: region
+    displayName: Azure Region
+    type: string
+    default: 'eastus'
+
+  - name: size
+    displayName: Size
+    type: string
+    default: 'small'
+    values:
+      - small
+      - medium
+      - large
+
+  # Action: deploy or destroy
+  - name: action
+    displayName: Action
+    type: string
+    default: 'apply'
+    values:
+      - apply
+      - destroy
+
+variables:
+  - name: tfWorkingDir
+    value: '$(System.DefaultWorkingDirectory)/terraform/${{ parameters.module_name }}'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+  - stage: Validate
+    displayName: 'Validate Terraform'
+    jobs:
+      - job: Validate
+        displayName: 'Terraform Validate'
+        steps:
+          - checkout: self
+
+          - task: TerraformInstaller@0
+            displayName: 'Install Terraform'
+            inputs:
+              terraformVersion: 'latest'
+
+          - script: |
+              echo "Module: ${{ parameters.module_name }}"
+              echo "Working Directory: $(tfWorkingDir)"
+              ls -la $(tfWorkingDir)
+            displayName: 'Show Module Contents'
+
+          - task: TerraformTaskV4@4
+            displayName: 'Terraform Init'
+            inputs:
+              provider: 'azurerm'
+              command: 'init'
+              workingDirectory: '$(tfWorkingDir)'
+              backendServiceArm: '$(AZURE_SERVICE_CONNECTION)'
+              backendAzureRmResourceGroupName: '$(TF_STATE_RG)'
+              backendAzureRmStorageAccountName: '$(TF_STATE_STORAGE)'
+              backendAzureRmContainerName: 'tfstate'
+              backendAzureRmKey: '${{ parameters.module_name }}-${{ parameters.project_name }}-${{ parameters.environment }}.tfstate'
+
+          - task: TerraformTaskV4@4
+            displayName: 'Terraform Validate'
+            inputs:
+              provider: 'azurerm'
+              command: 'validate'
+              workingDirectory: '$(tfWorkingDir)'
+
+  - stage: Plan
+    displayName: 'Terraform Plan'
+    dependsOn: Validate
+    jobs:
+      - job: Plan
+        displayName: 'Generate Plan'
+        steps:
+          - checkout: self
+
+          - task: TerraformInstaller@0
+            displayName: 'Install Terraform'
+            inputs:
+              terraformVersion: 'latest'
+
+          - task: TerraformTaskV4@4
+            displayName: 'Terraform Init'
+            inputs:
+              provider: 'azurerm'
+              command: 'init'
+              workingDirectory: '$(tfWorkingDir)'
+              backendServiceArm: '$(AZURE_SERVICE_CONNECTION)'
+              backendAzureRmResourceGroupName: '$(TF_STATE_RG)'
+              backendAzureRmStorageAccountName: '$(TF_STATE_STORAGE)'
+              backendAzureRmContainerName: 'tfstate'
+              backendAzureRmKey: '${{ parameters.module_name }}-${{ parameters.project_name }}-${{ parameters.environment }}.tfstate'
+
+          - task: TerraformTaskV4@4
+            displayName: 'Terraform Plan'
+            inputs:
+              provider: 'azurerm'
+              command: 'plan'
+              workingDirectory: '$(tfWorkingDir)'
+              environmentServiceNameAzureRM: '$(AZURE_SERVICE_CONNECTION)'
+              commandOptions: |
+                -var="project_name=${{ parameters.project_name }}"
+                -var="environment=${{ parameters.environment }}"
+                -var="region=${{ parameters.region }}"
+                -var="size=${{ parameters.size }}"
+                ${{ if eq(parameters.action, 'destroy') }}:
+                  -destroy
+                -out=tfplan
+
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish Plan'
+            inputs:
+              targetPath: '$(tfWorkingDir)/tfplan'
+              artifact: 'tfplan'
+
+  - stage: Apply
+    displayName: 'Terraform Apply'
+    dependsOn: Plan
+    jobs:
+      - deployment: Apply
+        displayName: 'Apply Changes'
+        environment: '${{ parameters.environment }}'  # Enables approval gates
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+
+                - task: TerraformInstaller@0
+                  displayName: 'Install Terraform'
+                  inputs:
+                    terraformVersion: 'latest'
+
+                - task: DownloadPipelineArtifact@2
+                  displayName: 'Download Plan'
+                  inputs:
+                    artifact: 'tfplan'
+                    path: '$(tfWorkingDir)'
+
+                - task: TerraformTaskV4@4
+                  displayName: 'Terraform Init'
+                  inputs:
+                    provider: 'azurerm'
+                    command: 'init'
+                    workingDirectory: '$(tfWorkingDir)'
+                    backendServiceArm: '$(AZURE_SERVICE_CONNECTION)'
+                    backendAzureRmResourceGroupName: '$(TF_STATE_RG)'
+                    backendAzureRmStorageAccountName: '$(TF_STATE_STORAGE)'
+                    backendAzureRmContainerName: 'tfstate'
+                    backendAzureRmKey: '${{ parameters.module_name }}-${{ parameters.project_name }}-${{ parameters.environment }}.tfstate'
+
+                - task: TerraformTaskV4@4
+                  displayName: 'Terraform Apply'
+                  inputs:
+                    provider: 'azurerm'
+                    command: 'apply'
+                    workingDirectory: '$(tfWorkingDir)'
+                    environmentServiceNameAzureRM: '$(AZURE_SERVICE_CONNECTION)'
+                    commandOptions: 'tfplan'
