@@ -1,0 +1,121 @@
+# ============================================================
+# TEMPLATE STARTER - Copy this file to create new catalog items
+# ============================================================
+# 1. Copy this file: cp _template.yaml.example my-template.yaml
+# 2. Update all fields below
+# 3. Restart the portal to see your new template
+# ============================================================
+
+# Unique identifier (used in URLs, must be lowercase with hyphens)
+id: my-template-name
+
+# Display name shown in the catalog
+name: My Template Display Name
+
+# Rich description with markdown support
+description: |
+  Brief description of what this template deploys.
+
+  **What's included:**
+  - Resource 1
+  - Resource 2
+  - Resource 3
+
+  **Best for:**
+  Describe the target users/use cases.
+
+  **Getting Started:**
+  Post-deployment instructions for users.
+
+# Category for filtering (existing: ai, data, compute, networking, development)
+category: development
+
+# Skill level affects the badge color (beginner=green, intermediate=yellow, advanced=red)
+skill_level: beginner
+
+# Tags for future search functionality
+tags:
+  - azure
+  - terraform
+
+# Cost estimate shown on catalog cards
+estimated_monthly_cost_usd: 50-100
+
+# Detailed cost breakdown shown on detail page
+cost_breakdown:
+  - component: Primary Resource
+    estimate: "$30/month"
+  - component: Secondary Resource
+    estimate: "$20-70/month (usage-based)"
+
+# Form parameters that users fill out
+# These are passed directly to your ADO pipeline as templateParameters
+parameters:
+  # Text input example
+  - name: project_name          # Maps to pipeline variable
+    label: Project Name         # Form label
+    type: string
+    required: true
+    description: A name for your deployment (lowercase, hyphens only)
+
+  # Dropdown select example
+  - name: environment
+    label: Environment
+    type: select
+    required: true
+    options:
+      - dev
+      - test
+      - prod
+    default: dev
+    description: Target environment
+
+  # T-shirt sizing example (enables Scale operations)
+  - name: size
+    label: Size
+    type: select
+    required: true
+    options:
+      - small
+      - medium
+      - large
+    default: small
+    description: |
+      Small: Minimal resources (~$50/mo)
+      Medium: Standard resources (~$100/mo)
+      Large: High-performance (~$200/mo)
+
+  # Optional field example
+  - name: owner_email
+    label: Owner Email
+    type: string
+    required: false
+    description: Email for notifications (optional)
+
+# Azure DevOps Pipeline Configuration
+# This is where the magic happens!
+ado_pipeline:
+  project: YourADOProject       # ADO Project name (not the repo)
+  pipeline_id: 123              # Pipeline ID (find in URL or pipeline settings)
+  branch: main                  # Branch to run from
+
+# ============================================================
+# HOW TO FIND YOUR PIPELINE ID:
+# 1. Go to Azure DevOps > Pipelines > Your Pipeline
+# 2. Look at URL: https://dev.azure.com/org/project/_build?definitionId=123
+#    The number after definitionId= is your pipeline_id
+#
+# HOW PARAMETERS ARE PASSED:
+# - The portal sends parameters as ADO templateParameters
+# - In your pipeline YAML, define them like:
+#
+#   parameters:
+#     - name: project_name
+#       type: string
+#     - name: environment
+#       type: string
+#     - name: size
+#       type: string
+#
+#   Then use: ${{ parameters.project_name }}
+# ============================================================

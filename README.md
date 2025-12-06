@@ -147,47 +147,104 @@ TEAMS_WEBHOOK_URL=https://outlook.office.com/webhook/...
 └── seed_demo_data.py        # Demo data seeder
 ```
 
-## Adding New Templates
+## Connecting Your Pipelines (Plug & Play)
 
-Create a new YAML file in the `catalog/` directory:
+### Step 1: Configure Azure DevOps Connection
+
+Edit your `.env` file:
+
+```bash
+ADO_ORG_URL=https://dev.azure.com/your-org
+ADO_PAT=your-personal-access-token
+```
+
+To get a PAT:
+1. Go to https://dev.azure.com/your-org/_usersSettings/tokens
+2. Create new token with **Build: Read & Execute** scope
+
+### Step 2: Find Your Pipeline ID
+
+1. Go to Azure DevOps > Pipelines > Your Pipeline
+2. Look at the URL: `https://dev.azure.com/org/project/_build?definitionId=123`
+3. The number after `definitionId=` is your `pipeline_id`
+
+### Step 3: Create a Catalog Entry
+
+Copy the template starter and customize:
+
+```bash
+cp catalog/_template.yaml.example catalog/my-deployment.yaml
+```
+
+Key sections to update:
 
 ```yaml
-id: my-template
-name: My New Template
-description: |
-  Detailed description of what this template deploys.
+id: my-deployment                # Unique ID (lowercase, hyphens)
+name: My Deployment              # Display name
+category: development            # ai, data, compute, networking, development
 
-  **Best for**: Who should use this template
-  **Skill level**: Beginner friendly
-
-category: development
-skill_level: beginner
-estimated_monthly_cost_usd: 50-100
-
-cost_breakdown:
-  - component: Resource 1
-    estimate: "$25/month"
-  - component: Resource 2
-    estimate: "$25-75/month"
-
+# Parameters map directly to ADO pipeline templateParameters
 parameters:
-  - name: project_name
+  - name: project_name           # This becomes ${{ parameters.project_name }} in ADO
     label: Project Name
     type: string
     required: true
-    description: A name for your project
 
-  - name: region
-    label: Azure Region
+  - name: environment
+    label: Environment
     type: select
-    options: [eastus, westus2, northeurope]
-    default: eastus
+    options: [dev, test, prod]
+    default: dev
 
+# Point to your existing ADO pipeline
 ado_pipeline:
-  project: YourADOProject
-  pipeline_id: 123
+  project: YourADOProject        # ADO project name
+  pipeline_id: 123               # From Step 2
   branch: main
 ```
+
+### Step 4: Configure Your ADO Pipeline
+
+Your pipeline YAML needs matching parameters:
+
+```yaml
+# azure-pipelines.yml
+parameters:
+  - name: project_name
+    type: string
+  - name: environment
+    type: string
+    default: dev
+
+trigger: none  # Manual trigger only (portal handles this)
+
+stages:
+  - stage: Deploy
+    jobs:
+      - job: Terraform
+        steps:
+          - script: |
+              echo "Deploying ${{ parameters.project_name }}"
+              echo "Environment: ${{ parameters.environment }}"
+            displayName: 'Run Terraform'
+          # Your actual terraform steps here
+```
+
+### Step 5: Restart & Test
+
+```bash
+# Restart to pick up new catalog entry
+python run.py
+```
+
+Visit http://localhost:8000/catalog to see your new template!
+
+### Tips
+
+- **Remove demo templates**: Delete the sample YAML files in `catalog/` you don't need
+- **Enable scaling**: Include a `size` parameter with options like `small`, `medium`, `large`
+- **Categories**: Use existing categories or add new ones (they auto-populate)
+- **Cost estimates**: Be honest - users appreciate accurate estimates
 
 ## Workflow
 
