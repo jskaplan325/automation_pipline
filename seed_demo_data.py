@@ -158,7 +158,7 @@ Deployment completed in 5m 18s""",
     # Another active deployment - degraded health
     {
         "catalog_item_id": "aks-cluster",
-        "requester_email": "test@company.com",
+        "requester_email": "user@company.com",
         "requester_name": "Test User",
         "parameters": {
             "cluster_name": "shared-services-aks",
@@ -193,7 +193,7 @@ Deployment completed in 12m 45s""",
     # Active deployment expiring soon
     {
         "catalog_item_id": "serverless-api",
-        "requester_email": "test@company.com",
+        "requester_email": "user@company.com",
         "requester_name": "Test User",
         "parameters": {
             "function_name": "webhook-processor",
@@ -224,6 +224,41 @@ Outputs:
   function_url = "https://webhook-processor.azurewebsites.net"
 
 Deployment completed in 3m 22s""",
+    },
+    # Active ML workspace deployment
+    {
+        "catalog_item_id": "ml-workspace",
+        "requester_email": "user@company.com",
+        "requester_name": "Test User",
+        "parameters": {
+            "workspace_name": "data-science-ws",
+            "region": "eastus",
+            "compute_instance": "Standard_DS3_v2",
+            "size": "medium",
+        },
+        "status": RequestStatus.COMPLETED,
+        "request_type": RequestType.DEPLOY,
+        "environment_type": "development",
+        "cost_center": "CC-ML-001",
+        "project_code": "DATA-SCI",
+        "resource_health": ResourceHealth.HEALTHY,
+        "created_at": datetime.utcnow() - timedelta(days=10),
+        "approved_by": "approver@company.com",
+        "approved_at": datetime.utcnow() - timedelta(days=10, hours=-1),
+        "ado_build_id": 12700,
+        "deployment_output": """Terraform Apply Complete!
+
+Resources created:
+  - azurerm_resource_group.main
+  - azurerm_machine_learning_workspace.main
+  - azurerm_storage_account.main
+  - azurerm_application_insights.main
+  - azurerm_key_vault.main
+
+Outputs:
+  workspace_url = "https://ml.azure.com/?wsid=/subscriptions/.../data-science-ws"
+
+Deployment completed in 6m 15s""",
     },
     # Rejected request
     {
@@ -294,9 +329,9 @@ Deployment failed after 2m 45s""",
 
 
 DEMO_FAVORITES = [
-    {"user_email": "test@company.com", "catalog_item_id": "azure-foundry"},
-    {"user_email": "test@company.com", "catalog_item_id": "aks-cluster"},
-    {"user_email": "test@company.com", "catalog_item_id": "serverless-api"},
+    {"user_email": "user@company.com", "catalog_item_id": "azure-foundry"},
+    {"user_email": "user@company.com", "catalog_item_id": "aks-cluster"},
+    {"user_email": "user@company.com", "catalog_item_id": "serverless-api"},
     {"user_email": "alice.johnson@company.com", "catalog_item_id": "azure-foundry"},
     {"user_email": "alice.johnson@company.com", "catalog_item_id": "ml-workspace"},
 ]
@@ -304,7 +339,7 @@ DEMO_FAVORITES = [
 
 DEMO_TEMPLATES = [
     {
-        "user_email": "test@company.com",
+        "user_email": "user@company.com",
         "catalog_item_id": "dev-environment",
         "name": "Standard Dev Setup",
         "description": "My standard development environment configuration",
@@ -318,7 +353,7 @@ DEMO_TEMPLATES = [
         "default_cost_center": "CC-DEV-001",
     },
     {
-        "user_email": "test@company.com",
+        "user_email": "user@company.com",
         "catalog_item_id": "azure-foundry",
         "name": "AI Project Template",
         "description": "Pre-configured AI Foundry for data science projects",
@@ -333,7 +368,7 @@ DEMO_TEMPLATES = [
         "default_expiration_days": 90,
     },
     {
-        "user_email": "alice.johnson@company.com",
+        "user_email": "user@company.com",
         "catalog_item_id": "serverless-api",
         "name": "Quick API Setup",
         "description": "Serverless API for quick prototypes",
@@ -413,14 +448,14 @@ def generate_audit_logs(requests_map):
 
     # Add some favorite actions
     logs.append({
-        "user_email": "test@company.com",
+        "user_email": "user@company.com",
         "user_name": "Test User",
         "action": AuditAction.FAVORITE_ADDED,
         "catalog_item_id": "azure-foundry",
         "timestamp": datetime.utcnow() - timedelta(days=5),
     })
     logs.append({
-        "user_email": "test@company.com",
+        "user_email": "user@company.com",
         "user_name": "Test User",
         "action": AuditAction.TEMPLATE_SAVED,
         "catalog_item_id": "dev-environment",
