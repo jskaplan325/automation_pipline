@@ -1,0 +1,94 @@
+id: resource-group
+name: Azure Resource Group
+description: |
+  A standalone Azure Resource Group for organizing and managing related Azure resources.
+
+  **What's included:**
+  - Azure Resource Group with standardized naming
+  - Consistent tagging for cost tracking and governance
+  - Foundation for deploying additional resources
+
+  **Best for:**
+  - Creating a dedicated container for a new project or workload
+  - Organizing resources by environment (dev, test, prod)
+  - Establishing RBAC boundaries for team access
+  - Cost allocation and chargeback tracking
+
+  **Naming Convention:**
+  Resources will be named: `rg-{project_name}-{environment}-{region_short}`
+
+category: development
+icon: folder
+skill_level: beginner
+tags:
+  - resource-group
+  - foundation
+  - organization
+  - governance
+
+estimated_monthly_cost_usd: 0
+cost_breakdown:
+  - component: Resource Group
+    estimate: "Free (no direct cost)"
+
+parameters:
+  - name: project_name
+    label: Project Name
+    type: string
+    required: true
+    description: Name for your project (lowercase, hyphens allowed)
+
+  - name: environment
+    label: Environment
+    type: select
+    required: true
+    options:
+      - dev
+      - test
+      - staging
+      - prod
+    default: dev
+    description: Deployment environment
+
+  - name: region
+    label: Azure Region
+    type: select
+    required: true
+    options:
+      - eastus
+      - eastus2
+      - westus2
+      - centralus
+      - northcentralus
+      - northeurope
+      - westeurope
+    default: eastus
+    description: Azure region for the resource group
+
+  - name: region_short
+    label: Region Short Code
+    type: select
+    required: true
+    options:
+      - eus
+      - eus2
+      - wus2
+      - cus
+      - ncus
+      - neu
+      - weu
+    default: eus
+    description: Short code for region (used in naming)
+
+  - name: cost_center
+    label: Cost Center
+    type: string
+    required: false
+    default: default
+    description: Cost center for billing allocation
+
+ado_pipeline:
+  project: InfrastructureTeam
+  pipeline_id: 30
+  branch: main
+  module_name: resource-group

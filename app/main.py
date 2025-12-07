@@ -11,7 +11,7 @@ from app.config import settings
 from app.database import init_db
 from app.auth import get_current_user
 from app.catalog import catalog_service
-from app.routers import catalog, requests, approvals, favorites, templates as templates_router, operations, audit
+from app.routers import catalog, requests, approvals, favorites, templates as templates_router, operations, audit, admin
 
 
 @asynccontextmanager
@@ -46,6 +46,7 @@ app.include_router(favorites.router, prefix="/favorites", tags=["Favorites"])
 app.include_router(templates_router.router, prefix="/templates", tags=["Templates"])
 app.include_router(operations.router, prefix="/operations", tags=["Operations"])
 app.include_router(audit.router, prefix="/audit", tags=["Audit"])
+app.include_router(admin.router, prefix="/admin", tags=["Admin"])
 
 
 @app.get("/")
